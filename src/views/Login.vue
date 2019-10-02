@@ -1,7 +1,7 @@
 <template>
   <form class="card auth-card" @submit.prevent="submitHandler">
     <div class="card-content">
-      <span class="card-title">Домашняя бухгалтерия</span>
+      <span class="card-title">{{'Home_accounting' | localize}}</span>
       <div class="input-field">
         <input
             id="email"
@@ -14,13 +14,13 @@
           class="helper-text invalid"
           v-if="$v.email.$dirty && !$v.email.required"
         >
-          Поле не должно быть пустым
+          {{'Field_must_be' | localize}}
         </small>
         <small 
           class="helper-text invalid"
           v-else-if="$v.email.$dirty && !$v.email.email"
         >
-          Введите корректный email
+          {{'Correct_email' | localize}}
         </small>
       </div>
       <div class="input-field">
@@ -30,18 +30,18 @@
             v-model.trim="password"
             :class="{invalid: ($v.password.$dirty && !$v.password.required) || ($v.password.$dirty && !$v.password.minLength)}"
         >
-        <label for="password">Пароль</label>
+        <label for="password">{{'Password' | localize}}</label>
         <small 
           class="helper-text invalid"
           v-if="$v.password.$dirty && !$v.password.required"
         >
-          Введите пароль
+          {{'Enter_Password' | localize}}
         </small>
         <small 
           class="helper-text invalid"
           v-else-if="$v.password.$dirty && !$v.password.minLength"
         >
-          Минимальная длина пароля {{$v.password.$params.minLength.min}} символов. Сейчас: {{password.length}}
+          {{'Min_lengthPassword' | localize}} {{$v.password.$params.minLength.min}}. {{'Now' | localize}}: {{password.length}}
         </small>
       </div>
     </div>
@@ -51,14 +51,14 @@
             class="btn waves-effect waves-light auth-submit"
             type="submit"
         >
-          Войти
+          {{'Enter' | localize}}
           <i class="material-icons right">send</i>
         </button>
       </div>
 
       <p class="center">
-        Нет аккаунта?
-        <router-link to="/register">Зарегистрироваться</router-link>
+        {{'No_account' | localize}}
+        <router-link to="/register">{{'Btn_register' | localize}}</router-link>
       </p>
     </div>
   </form>
@@ -70,6 +70,11 @@ import messages from '@/utils/messages'
 
 export default {
   name: 'login',
+  metaInfo() {
+    return {
+      title: this.$title('Login')
+    }
+  },
   validations: {
     email: {
       email, 
@@ -85,7 +90,7 @@ export default {
     password: ''
   }),
   methods: {
-    submitHandler() {
+    async submitHandler() {
       if(this.$v.$invalid) {
         this.$v.$touch()
         return
@@ -95,8 +100,10 @@ export default {
         password: this.password
       }
 
-      console.log(formData)
-      this.$router.push('/')
+      try {
+        await this.$store.dispatch('login', formData)
+        this.$router.push('/')
+      } catch (e) {}
     }
   },
   mounted() {
